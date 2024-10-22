@@ -1,24 +1,25 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { useState } from "react";
 import Navbar from "./components/Navbar";
 import MapWithUsers from "./components/MapWithUsers";
 import Geolocation from "./components/Geolocation";
+import React, { useState } from "react";
 
 function App() {
   const [location, setLocation] = useState(null);
 
   return (
     <Router>
-      <div className="App">
+      <div className="flex flex-col h-screen">
+        {" "}
+        {/* Main container with Flexbox */}
         <Navbar />
         <Routes>
           <Route
             path="/"
             element={
-              <div className="text-center mt-10">
+              <div className="text-center mt-10 flex-grow">
                 <h1>Welcome to the Contact Tracing App!</h1>
-                <Geolocation onLocationChange={setLocation} />{" "}
-                {/* Use Geolocation */}
+                <Geolocation onLocationChange={setLocation} />
                 {location && (
                   <div>
                     <p>Your Location:</p>
@@ -36,7 +37,9 @@ function App() {
           <Route
             path="/about"
             element={
-              <div className="text-center mt-10">About this application...</div>
+              <div className="text-center mt-10 flex-grow">
+                About this application...
+              </div>
             }
           />
         </Routes>
