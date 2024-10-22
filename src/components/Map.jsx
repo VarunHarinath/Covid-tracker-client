@@ -3,11 +3,11 @@ import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 
-// Create a custom icon for the user's location
+// Custom icon for user's location
 const userIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/3006/3006884.png", // Replace with your icon URL
-  iconSize: [30, 30], // Size of the icon
-  iconAnchor: [15, 30], // Point of the icon which will correspond to marker's location
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/3006/3006884.png", // Icon for user's location
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
 });
 
 const Map = ({ users, userLocation }) => {
@@ -47,9 +47,7 @@ const Map = ({ users, userLocation }) => {
         <Marker key={index} position={[user.lat, user.lon]}>
           <Popup>
             <div>
-              <strong>Name:</strong> {user.name} <br />
-              <strong>Status:</strong>{" "}
-              {user.hasCovid ? "COVID Positive" : "Safe"}
+              <strong>Name:</strong> {user.name}
             </div>
           </Popup>
         </Marker>
