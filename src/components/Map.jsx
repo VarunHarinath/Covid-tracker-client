@@ -47,7 +47,9 @@ const Map = ({ users, userLocation }) => {
         <Marker key={index} position={[user.lat, user.lon]}>
           <Popup>
             <div>
-              <strong>Name:</strong> {user.name}
+              <strong>Name:</strong> {user.name} <br />
+              <strong>Status:</strong>{" "}
+              {user.hasCovid ? "COVID Positive" : "Safe"}
             </div>
           </Popup>
         </Marker>
