@@ -10,17 +10,8 @@ const userIcon = new L.Icon({
   iconAnchor: [15, 30],
 });
 
-const Map = ({ users, userLocation }) => {
+const Map = ({ users, userLocation, isUserInDanger }) => {
   const position = [17.385044, 78.486671]; // Default position (Central Hyderabad)
-
-  // Test users data
-  const testUsers = [
-    { lat: 17.385044, lon: 78.486671, name: "John Doe", hasCovid: true }, // Location: Central Hyderabad
-    { lat: 17.425, lon: 78.451, name: "Jane Smith", hasCovid: false }, // Location: Banjara Hills
-    { lat: 17.452, lon: 78.457, name: "Alice Johnson", hasCovid: true }, // Location: Gachibowli
-    { lat: 17.423, lon: 78.493, name: "Bob Brown", hasCovid: false }, // Location: Hitech City
-    { lat: 17.385044, lon: 78.486671, name: "Charlie Black", hasCovid: true }, // Location: Central Hyderabad
-  ];
 
   return (
     <MapContainer
@@ -38,12 +29,15 @@ const Map = ({ users, userLocation }) => {
           <Popup>
             <div>
               <strong>Your Location</strong>
+              <br />
+              <strong>Status:</strong>{" "}
+              {isUserInDanger ? "You are in danger!" : "You are safe!"}
             </div>
           </Popup>
         </Marker>
       )}
       {/* Render other users' markers */}
-      {testUsers.map((user, index) => (
+      {users.map((user, index) => (
         <Marker key={index} position={[user.lat, user.lon]}>
           <Popup>
             <div>
