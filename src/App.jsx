@@ -18,7 +18,7 @@ function App() {
             path="/"
             element={
               <div className="text-center mt-10 flex-grow">
-                <h1>Welcome to the Contact Tracing App!</h1>
+                <h1>Welcome to the Covid Tracing App!</h1>
                 <Geolocation onLocationChange={setLocation} />
                 {location && (
                   <div>
