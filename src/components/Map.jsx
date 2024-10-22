@@ -9,16 +9,53 @@ const userIcon = new L.Icon({
   iconAnchor: [15, 30],
 });
 
+// Function to calculate distance between two coordinates in kilometers
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in kilometers
+  return distance;
+};
+
 const Map = ({ users, userLocation }) => {
   const position = [17.385044, 78.486671]; // Default position (Central Hyderabad)
 
   const testUsers = [
-    { lat: 17.385044, lon: 78.486671, name: "John Doe", hasCovid: true },
-    { lat: 17.425, lon: 78.451, name: "Jane Smith", hasCovid: false },
-    { lat: 17.452, lon: 78.457, name: "Alice Johnson", hasCovid: true },
-    { lat: 17.423, lon: 78.493, name: "Bob Brown", hasCovid: false },
-    { lat: 17.388, lon: 78.481, name: "Charlie Black", hasCovid: true },
+    { lat: 17.5535145, lon: 78.4446315, name: "John Doe", hasCovid: true }, // Current user
+    { lat: 17.551, lon: 78.446, name: "Jane Smith", hasCovid: false }, // Nearby user 1
+    { lat: 17.554, lon: 78.442, name: "Alice Johnson", hasCovid: true }, // Nearby user 2
+    { lat: 17.425, lon: 78.451, name: "Bob Brown", hasCovid: false }, // Further user
+    { lat: 17.388, lon: 78.481, name: "Charlie Black", hasCovid: true }, // Another user
   ];
+
+  // Calculate danger status based on nearby COVID positive users
+  const dangerThreshold = 1; // 1 km
+  let positiveNearbyCount = 0;
+
+  // Check if the user location is available
+  if (userLocation) {
+    testUsers.forEach((user) => {
+      const distance = calculateDistance(
+        userLocation.lat,
+        userLocation.lon,
+        user.lat,
+        user.lon
+      );
+      if (user.hasCovid && distance <= dangerThreshold) {
+        positiveNearbyCount++;
+      }
+    });
+  }
+
+  const userStatus = positiveNearbyCount >= 2 ? "In Danger" : "Safe";
 
   return (
     <MapContainer
@@ -34,7 +71,8 @@ const Map = ({ users, userLocation }) => {
         <Marker position={[userLocation.lat, userLocation.lon]} icon={userIcon}>
           <Popup>
             <div>
-              <strong>Your Location</strong>
+              <strong>Your Location</strong> <br />
+              <strong>Status:</strong> {userStatus}
             </div>
           </Popup>
         </Marker>
