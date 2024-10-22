@@ -13,7 +13,7 @@ const MapWithUsers = () => {
   return (
     <>
       <Geolocation onLocationChange={handleLocationChange} />
-      {userLocation && <Map users={[userLocation]} />}{" "}
+      <Map users={[userLocation]} userLocation={userLocation} />{" "}
       {/* Pass user location to the Map component */}
     </>
   );
