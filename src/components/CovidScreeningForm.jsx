@@ -1,8 +1,10 @@
-// src/components/CovidScreeningForm.js
 import React, { useState } from "react";
+import Geolocation from "./Geolocation"; // Import the Geolocation component
 
 const CovidScreeningForm = () => {
   const [formData, setFormData] = useState({
+    name: "",
+    age: "",
     file: null,
     cough: "",
     fever: "",
@@ -10,6 +12,8 @@ const CovidScreeningForm = () => {
     lossOfTaste: "",
     travelHistory: "",
   });
+
+  const [location, setLocation] = useState({ lat: null, lon: null });
 
   const handleFileChange = (e) => {
     setFormData({ ...formData, file: e.target.files[0] });
@@ -20,14 +24,47 @@ const CovidScreeningForm = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleLocationChange = (loc) => {
+    setLocation(loc);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Log the data to the console (or send it to a server)
-    console.log("Form Data submitted:", formData);
+    // Define weights for symptoms
+    const symptoms = {
+      cough: formData.cough === "yes" ? 1 : 0,
+      fever: formData.fever === "yes" ? 2 : 0, // Fever has a higher weight
+      fatigue: formData.fatigue === "yes" ? 1 : 0,
+      lossOfTaste: formData.lossOfTaste === "yes" ? 3 : 0, // Significant indicator
+      travelHistory: formData.travelHistory === "yes" ? 2 : 0, // Travel history is significant
+    };
+
+    // Calculate total score
+    const totalScore = Object.values(symptoms).reduce(
+      (acc, curr) => acc + curr,
+      0
+    );
+
+    // Set a threshold for COVID status determination
+    const covidThreshold = 3; // This can be adjusted based on your criteria
+
+    // Create the final JSON object
+    const finalData = {
+      lat: location.lat,
+      lon: location.lon,
+      name: formData.name,
+      age: formData.age,
+      isCovid: totalScore >= covidThreshold, // Determine COVID status based on score
+    };
+
+    // Log the final data to the console
+    console.log("Final Data submitted:", finalData);
 
     // Reset form after submission (optional)
     setFormData({
+      name: "",
+      age: "",
       file: null,
       cough: "",
       fever: "",
@@ -35,6 +72,7 @@ const CovidScreeningForm = () => {
       lossOfTaste: "",
       travelHistory: "",
     });
+    setLocation({ lat: null, lon: null });
   };
 
   return (
@@ -48,6 +86,9 @@ const CovidScreeningForm = () => {
         </p>
       </div>
 
+      {/* Geolocation Component */}
+      <Geolocation onLocationChange={handleLocationChange} />
+
       {/* Form on the Right */}
       <form
         onSubmit={handleSubmit}
@@ -56,6 +97,32 @@ const CovidScreeningForm = () => {
         <h2 className="text-xl font-bold mb-4">
           Take this form if you really suffer from COVID
         </h2>
+
+        {/* Name Field */}
+        <div className="mb-4">
+          <label className="block text-gray-700">Name:</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="mt-2 border rounded p-2 w-full"
+            required
+          />
+        </div>
+
+        {/* Age Field */}
+        <div className="mb-4">
+          <label className="block text-gray-700">Age:</label>
+          <input
+            type="number"
+            name="age"
+            value={formData.age}
+            onChange={handleChange}
+            className="mt-2 border rounded p-2 w-full"
+            required
+          />
+        </div>
 
         <div className="mb-4">
           <label className="block text-gray-700">Upload your reports:</label>
@@ -67,125 +134,211 @@ const CovidScreeningForm = () => {
           />
         </div>
 
+        {/* Radio Buttons for Symptoms */}
+        {/* Cough */}
         <div className="mb-4">
           <label className="block text-gray-700">Do you have a cough?</label>
-          <input
-            type="radio"
-            name="cough"
-            value="yes"
-            checked={formData.cough === "yes"}
-            onChange={handleChange}
-            required
-          />{" "}
-          Yes
-          <input
-            type="radio"
-            name="cough"
-            value="no"
-            checked={formData.cough === "no"}
-            onChange={handleChange}
-            className="ml-2"
-          />{" "}
-          No
+          <div className="flex items-center">
+            <label className="flex items-center mr-4">
+              <input
+                type="radio"
+                name="cough"
+                value="yes"
+                checked={formData.cough === "yes"}
+                onChange={handleChange}
+                className="hidden"
+              />
+              <span className="flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-blue-500 mr-2 cursor-pointer">
+                {formData.cough === "yes" && (
+                  <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
+                )}
+              </span>
+              Yes
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="cough"
+                value="no"
+                checked={formData.cough === "no"}
+                onChange={handleChange}
+                className="hidden"
+              />
+              <span className="flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-blue-500 mr-2 cursor-pointer">
+                {formData.cough === "no" && (
+                  <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
+                )}
+              </span>
+              No
+            </label>
+          </div>
         </div>
 
+        {/* Fever */}
         <div className="mb-4">
           <label className="block text-gray-700">Do you have a fever?</label>
-          <input
-            type="radio"
-            name="fever"
-            value="yes"
-            checked={formData.fever === "yes"}
-            onChange={handleChange}
-            required
-          />{" "}
-          Yes
-          <input
-            type="radio"
-            name="fever"
-            value="no"
-            checked={formData.fever === "no"}
-            onChange={handleChange}
-            className="ml-2"
-          />{" "}
-          No
+          <div className="flex items-center">
+            <label className="flex items-center mr-4">
+              <input
+                type="radio"
+                name="fever"
+                value="yes"
+                checked={formData.fever === "yes"}
+                onChange={handleChange}
+                className="hidden"
+              />
+              <span className="flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-blue-500 mr-2 cursor-pointer">
+                {formData.fever === "yes" && (
+                  <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
+                )}
+              </span>
+              Yes
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="fever"
+                value="no"
+                checked={formData.fever === "no"}
+                onChange={handleChange}
+                className="hidden"
+              />
+              <span className="flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-blue-500 mr-2 cursor-pointer">
+                {formData.fever === "no" && (
+                  <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
+                )}
+              </span>
+              No
+            </label>
+          </div>
         </div>
 
+        {/* Fatigue */}
         <div className="mb-4">
           <label className="block text-gray-700">
             Are you experiencing fatigue?
           </label>
-          <input
-            type="radio"
-            name="fatigue"
-            value="yes"
-            checked={formData.fatigue === "yes"}
-            onChange={handleChange}
-            required
-          />{" "}
-          Yes
-          <input
-            type="radio"
-            name="fatigue"
-            value="no"
-            checked={formData.fatigue === "no"}
-            onChange={handleChange}
-            className="ml-2"
-          />{" "}
-          No
+          <div className="flex items-center">
+            <label className="flex items-center mr-4">
+              <input
+                type="radio"
+                name="fatigue"
+                value="yes"
+                checked={formData.fatigue === "yes"}
+                onChange={handleChange}
+                className="hidden"
+              />
+              <span className="flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-blue-500 mr-2 cursor-pointer">
+                {formData.fatigue === "yes" && (
+                  <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
+                )}
+              </span>
+              Yes
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="fatigue"
+                value="no"
+                checked={formData.fatigue === "no"}
+                onChange={handleChange}
+                className="hidden"
+              />
+              <span className="flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-blue-500 mr-2 cursor-pointer">
+                {formData.fatigue === "no" && (
+                  <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
+                )}
+              </span>
+              No
+            </label>
+          </div>
         </div>
 
+        {/* Loss of Taste */}
         <div className="mb-4">
           <label className="block text-gray-700">
-            Have you lost your sense of taste or smell?
+            Do you have a loss of taste or smell?
           </label>
-          <input
-            type="radio"
-            name="lossOfTaste"
-            value="yes"
-            checked={formData.lossOfTaste === "yes"}
-            onChange={handleChange}
-            required
-          />{" "}
-          Yes
-          <input
-            type="radio"
-            name="lossOfTaste"
-            value="no"
-            checked={formData.lossOfTaste === "no"}
-            onChange={handleChange}
-            className="ml-2"
-          />{" "}
-          No
+          <div className="flex items-center">
+            <label className="flex items-center mr-4">
+              <input
+                type="radio"
+                name="lossOfTaste"
+                value="yes"
+                checked={formData.lossOfTaste === "yes"}
+                onChange={handleChange}
+                className="hidden"
+              />
+              <span className="flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-blue-500 mr-2 cursor-pointer">
+                {formData.lossOfTaste === "yes" && (
+                  <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
+                )}
+              </span>
+              Yes
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="lossOfTaste"
+                value="no"
+                checked={formData.lossOfTaste === "no"}
+                onChange={handleChange}
+                className="hidden"
+              />
+              <span className="flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-blue-500 mr-2 cursor-pointer">
+                {formData.lossOfTaste === "no" && (
+                  <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
+                )}
+              </span>
+              No
+            </label>
+          </div>
         </div>
 
+        {/* Travel History */}
         <div className="mb-4">
           <label className="block text-gray-700">
             Have you traveled recently?
           </label>
-          <input
-            type="radio"
-            name="travelHistory"
-            value="yes"
-            checked={formData.travelHistory === "yes"}
-            onChange={handleChange}
-            required
-          />{" "}
-          Yes
-          <input
-            type="radio"
-            name="travelHistory"
-            value="no"
-            checked={formData.travelHistory === "no"}
-            onChange={handleChange}
-            className="ml-2"
-          />{" "}
-          No
+          <div className="flex items-center">
+            <label className="flex items-center mr-4">
+              <input
+                type="radio"
+                name="travelHistory"
+                value="yes"
+                checked={formData.travelHistory === "yes"}
+                onChange={handleChange}
+                className="hidden"
+              />
+              <span className="flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-blue-500 mr-2 cursor-pointer">
+                {formData.travelHistory === "yes" && (
+                  <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
+                )}
+              </span>
+              Yes
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="travelHistory"
+                value="no"
+                checked={formData.travelHistory === "no"}
+                onChange={handleChange}
+                className="hidden"
+              />
+              <span className="flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-blue-500 mr-2 cursor-pointer">
+                {formData.travelHistory === "no" && (
+                  <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
+                )}
+              </span>
+              No
+            </label>
+          </div>
         </div>
 
         <button
           type="submit"
-          className="bg-blue-500 text-white p-2 rounded hover:bg-blue-700"
+          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
         >
           Submit
         </button>
