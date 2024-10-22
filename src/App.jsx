@@ -33,6 +33,7 @@ function App() {
                         Longitude:{" "}
                         <span className="font-medium">{location.lon}</span>
                       </p>
+                      <p>*Is not stored or saved*</p>
                     </div>
                   )}
                   <div className="flex space-x-4 mt-6">
